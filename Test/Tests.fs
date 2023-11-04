@@ -11,28 +11,36 @@ open Lift.Events
 
 [<Fact>]
 let ``Calling the lift`` () =
-  let events = given [] (Decisions.requestLift 3)
-  Assert.StrictEqual(events, [ LiftRequested 3 ])
+  let data = { floor = 3 }
+  let events = given [] (Decisions.requestLift data)
+  Assert.StrictEqual(events, [ LiftRequested data ])
 
 
 [<Fact>]
 let ``Calling the lift is idempotent`` () =
-  let events = given [ LiftRequested 3 ] (Decisions.requestLift 3)
+  let data = { floor = 3 }
+  let events = given [ LiftRequested data ] (Decisions.requestLift data)
   Assert.StrictEqual(events, [])
 
 
 [<Fact>]
 let ``Visiting the requested floor`` () =
-  let events = given [ LiftRequested 3 ] (Decisions.visitFloor 3)
-  Assert.StrictEqual(events, [ FloorVisited 3 ])
+  let data = { floor = 3 }
+  let events = given [ LiftRequested data ] (Decisions.visitFloor data)
+  Assert.StrictEqual(events, [ FloorVisited data ])
 
 [<Fact>]
 let ``Visiting the requested floor is idempotent`` () =
-  let events = given [ LiftRequested 3; FloorVisited 3 ] (Decisions.visitFloor 3)
+  let data = { floor = 3 }
+
+  let events =
+    given [ LiftRequested data; FloorVisited data ] (Decisions.visitFloor data)
+
   Assert.StrictEqual(events, [])
 
 
 [<Fact>]
 let ``Attempting to visit an unrequested floor does nothing`` () =
-  let events = given [ LiftRequested 3 ] (Decisions.visitFloor 4)
+  let data = { floor = 3 }
+  let events = given [ LiftRequested data ] (Decisions.visitFloor { floor = 4 })
   Assert.StrictEqual(events, [])
