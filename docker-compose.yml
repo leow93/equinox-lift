@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  messagedb:
+    image: ethangarofolo/message-db
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:

@@ -44,4 +44,25 @@ app.MapPost(
 )
 |> ignore
 
+
+app.MapPost(
+  "/{id}/visit",
+  Func<string, CallLiftDto, _>(fun id body ->
+    task {
+      let id = Lift.LiftId.parse id
+      do! svc.VisitFloor(id, { floor = body.floor })
+    })
+)
+|> ignore
+
+app.MapGet(
+  "/{id}",
+  Func<string, _>(fun id ->
+    task {
+      let id = Lift.LiftId.parse id
+      return! svc.Get(id)
+    })
+)
+|> ignore
+
 app.Run()

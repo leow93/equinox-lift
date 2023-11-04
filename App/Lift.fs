@@ -44,7 +44,6 @@ module Decisions =
     else
       []
 
-
 open FSharp.UMX
 open System
 
@@ -54,6 +53,11 @@ and [<Measure>] liftId
 module LiftId =
   let inline ofGuid (g: Guid) : LiftId = %g
   let inline parse (id: string) = Guid.Parse id |> ofGuid
+  
+  let inline tryParse (id: string) =
+    match Guid.TryParse id with
+    | true, x -> Some (ofGuid x)
+    | _ -> None
   let inline toGuid (id: LiftId) : Guid = %id
   let inline toString (id: LiftId) = (toGuid id).ToString()
 
@@ -62,13 +66,20 @@ let Category = "Lift"
 
 let streamId = Equinox.StreamId.gen LiftId.toString
 
+module Queries =
+  let summary = id 
+   
 type Service internal (resolve: LiftId -> Equinox.Decider<Events.Event, Fold.State>) =
-  member _.Call(id: LiftId, cmd: FloorDetails) =
+  member _.Call(id, cmd) =
     let decider = resolve id
     decider.Transact(Decisions.requestLift cmd)
 
-  member _.VisitFloor(id: LiftId, cmd: FloorDetails) =
+  member _.VisitFloor(id, cmd) =
     let decider = resolve id
     decider.Transact(Decisions.visitFloor cmd)
+  
+  member _.Get(id) =
+    let decider = resolve id
+    decider.Query(Queries.summary)
 
 let create resolve = Service(streamId >> resolve Category)
