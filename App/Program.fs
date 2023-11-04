@@ -1,15 +1,13 @@
+module Program
+
 open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 
-[<EntryPoint>]
-let main args =
-    let builder = WebApplication.CreateBuilder(args)
-    let app = builder.Build()
+let builder = WebApplication.CreateBuilder()
 
-    app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
+let app = builder.Build()
 
-    app.Run()
+app.MapGet("/healthz", Func<_>(fun () -> "OK")) |> ignore
 
-    0 // Exit code
-
+app.Run()
